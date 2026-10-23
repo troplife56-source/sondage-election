@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sondage Citoyen - Climat Social en France</title>
+    <!-- Tailwind CSS pour un design moderne et responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkred: '#7f1d1d',
+                        bloodred: '#991b1b',
+                        charcoal: '#0f172a',
+                        ash: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;800&display=swap');
+        
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+
+        /* Animation d'ambiance braises / fumée */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        .glow-bg {
+            animation: pulse-glow 6s infinite ease-in-out;
+        }
+
+        /* Style brut et intense */
+        body {
+            background-color: #090d16;
+            color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="font-inter min-h-screen flex flex-col justify-between selection:bg-red-900 selection:text-white relative overflow-x-hidden">
+
+    <!-- Fond d'ambiance crépusculaire / crise -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-red-950/40 rounded-full blur-3xl glow-bg"></div>
+        <div class="absolute top-1/2 -right-40 w-[30rem] h-[30rem] bg-amber-950/20 rounded-full blur-3xl glow-bg" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-0 left-1/3 w-80 h-80 bg-red-900/20 rounded-full blur-3xl glow-bg" style="animation-delay: 4s;"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:3rem_3rem]"></div>
+    </div>
+
+    <!-- En-tête Principal -->
+    <header class="relative z-10 w-full max-w-4xl mx-auto pt-8 px-4 text-center">
+        <div class="inline-block px-4 py-1 mb-3 rounded-full bg-red-950/80 border border-red-800/60 text-red-400 text-xs font-bold tracking-widest uppercase shadow-lg shadow-red-950/50">
+            ⚠️ Baromètre d'Urgence Nationale
+        </div>
+        <h1 class="font-cinzel text-3xl md:text-5xl font-black tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-amber-200 to-red-600 drop-shadow-[0_2px_10px_rgba(239,68,68,0.3)]">
+            La France au Bord du Gouffre
+        </h1>
+        <p class="mt-3 text-slate-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+            Crise sociale, manifestations et tensions extrêmes : face au chaos politique actuel, exprimez votre voix. Quel camp saura redresser le pays ?
+        </p>
+    </header>
+
+    <!-- Contenu Principal : Grille de vote et Résultats en direct -->
+    <main class="relative z-10 w-full max-w-4xl mx-auto px-4 py-8 flex-grow">
+        
+        <!-- Alerte / Message de statut interactif -->
+        <div id="alert-box" class="hidden mb-6 p-4 rounded-xl border text-sm font-semibold transition-all duration-300 flex items-center gap-3">
+            <span id="alert-icon">🔥</span>
+            <span id="alert-text">Vote enregistré avec succès.</span>
+        </div>
+
+        <!-- Section des Partis Politiques (Boutons d'action) -->
+        <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-6 shadow-2xl mb-8">
+            <h2 class="text-xs uppercase tracking-widest text-slate-400 font-bold mb-4 flex items-center justify-between">
+                <span>Choisissez votre direction politique</span>
+                <span class="text-red-500 animate-pulse">● En direct permanent</span>
+            </h2>
+
+            <div id="parties-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <!-- Les cartes de partis seront injectées dynamiquement ici par JS -->
+            </div>
+        </div>
+
+        <!-- Section des Résultats & Rapport de Force -->
+        <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-6 shadow-2xl">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-slate-800 gap-2">
+                <div>
+                    <h3 class="font-cinzel text-lg font-bold text-slate-200 uppercase tracking-wide">Rapport de Force National</h3>
+                    <p class="text-xs text-slate-400">Total des suffrages exprimés par les citoyens</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="total-votes-badge" class="bg-slate-800 text-amber-400 border border-slate-700 px-3 py-1 rounded-full text-xs font-bold font-mono">
+                        0 votes
+                    </span>
+                    <button onclick="resetVotes()" title="Réinitialiser" class="text-slate-500 hover:text-red-400 text-xs underline transition">
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
+
+            <!-- Barres de progression dynamiques -->
+            <div id="results-container" class="space-y-4">
+                <!-- Rempli dynamiquement -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="relative z-10 text-center py-6 border-t border-slate-900 text-slate-600 text-xs">
+        <p>Sondage Citoyen Indépendant — Ambiance de crise politique en France.</p>
+    </footer>
+
+    <!-- Script de gestion des votes et de l'interactivité -->
+    <script>
+        // Liste exhaustive des partis politiques français + Vote Blanc & Colère
+        const partiesData = [
+            { id: 'rn', name: 'Rassemblement National (RN)', short: 'RN', color: 'from-blue-950 to-indigo-950', border: 'border-blue-700/50', hover: 'hover:border-blue-500', barColor: 'bg-blue-600', badgeBg: 'bg-blue-950 text-blue-300' },
+            { id: 'lfi', name: 'La France Insoumise (LFI)', short: 'LFI', color: 'from-red-950 to-rose-950', border: 'border-red-700/50', hover: 'hover:border-red-500', barColor: 'bg-red-600', badgeBg: 'bg-red-950 text-red-300' },
+            { id: 'renaissance', name: 'Renaissance (Majorité)', short: 'RE', color: 'from-amber-950 to-yellow-950', border: 'border-amber-700/50', hover: 'hover:border-amber-500', barColor: 'bg-amber-500', badgeBg: 'bg-amber-950 text-amber-300' },
+            { id: 'ps', name: 'Parti Socialiste (PS)', short: 'PS', color: 'from-rose-950 to-pink-950', border: 'border-rose-800/50', hover: 'hover:border-rose-500', barColor: 'bg-rose-600', badgeBg: 'bg-rose-950 text-rose-300' },
+            { id: 'lr', name: 'Les Républicains (LR)', short: 'LR', color: 'from-sky-950 to-blue-950', border: 'border-sky-800/50', hover: 'hover:border-sky-500', barColor: 'bg-sky-600', badgeBg: 'bg-sky-950 text-sky-300' },
+            { id: 'eelv', name: 'Les Écologistes (EELV)', short: 'EELV', color: 'from-emerald-950 to-green-950', border: 'border-emerald-800/50', hover: 'hover:border-emerald-500', barColor: 'bg-emerald-600', badgeBg: 'bg-emerald-950 text-emerald-300' },
+            { id: 'horizons', name: 'Horizons', short: 'HORIZONS', color: 'from-cyan-950 to-blue-950', border: 'border-cyan-800/50', hover: 'hover:border-cyan-500', barColor: 'bg-cyan-600', badgeBg: 'bg-cyan-950 text-cyan-300' },
+            { id: 'pcf', name: 'Parti Communiste Français (PCF)', short: 'PCF', color: 'from-red-900 to-red-950', border: 'border-red-600/50', hover: 'hover:border-red-400', barColor: 'bg-red-700', badgeBg: 'bg-red-950 text-red-200' },
+            { id: 'reconquete', name: 'Reconquête !', short: 'REC', color: 'from-blue-900 to-slate-900', border: 'border-blue-600/50', hover: 'hover:border-blue-400', barColor: 'bg-blue-700', badgeBg: 'bg-blue-950 text-blue-200' },
+            { id: 'vote_blanc', name: 'Vote Blanc / Rejet Global', short: 'BLANC', color: 'from-slate-900 to-zinc-900', border: 'border-slate-600/50', hover: 'hover:border-slate-400', barColor: 'bg-slate-400', badgeBg: 'bg-slate-800 text-slate-200' }
+        ];
+
+        // Clé de stockage local pour persistance
+        const STORAGE_KEY = 'france_crise_votes_v3';
+
+        // Charger ou initialiser les votes à zéro pour tous les partis
+        function getVotes() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    console.error("Erreur de lecture stockage", e);
+                }
+            }
+            let initialVotes = {};
+            partiesData.forEach(p => {
+                initialVotes[p.id] = 0;
+            });
+            return initialVotes;
+        }
+
+        let votes = getVotes();
+
+        // Fonction pour enregistrer un vote
+        function voteFor(partyId) {
+            if (votes[partyId] !== undefined) {
+                votes[partyId]++;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(votes));
+                
+                const partyObj = partiesData.find(p => p.id === partyId);
+                showAlert(`Votre voix a été enregistrée pour ${partyObj.name}.`);
+                
+                renderApp();
+            }
+        }
+
+        // Afficher une alerte personnalisée moderne sans alert()
+        function showAlert(message) {
+            const box = document.getElementById('alert-box');
+            const text = document.getElementById('alert-text');
+            text.textContent = message;
+            box.className = "mb-6 p-4 rounded-xl border border-red-700/60 bg-red-950/60 text-red-200 text-sm font-semibold transition-all duration-300 flex items-center gap-3 shadow-lg shadow-red-950/50";
+            box.classList.remove('hidden');
+
+            setTimeout(() => {
+                box.classList.add('opacity-0');
+                setTimeout(() => box.classList.add('hidden'), 300);
+            }, 4000);
+        }
+
+        // Réinitialiser les votes
+        function resetVotes() {
+            if (confirm("Voulez-vous vraiment réinitialiser tous les compteurs ?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                votes = getVotes();
+                renderApp();
+                showAlert("Les compteurs ont été remis à zéro.");
+            }
+        }
+
+        // Rendu dynamique de l'interface
+        function renderApp() {
+            const partiesContainer = document.getElementById('parties-container');
+            const resultsContainer = document.getElementById('results-container');
+            const totalBadge = document.getElementById('total-votes-badge');
+
+            // Calcul du total général
+            const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
+            totalBadge.textContent = `${totalVotes.toLocaleString()} votes`;
+
+            // Génération des boutons de partis
+            partiesContainer.innerHTML = '';
+            partiesData.forEach(party => {
+                const count = votes[party.id] || 0;
+                const percentage = totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : 0;
+
+                const card = document.createElement('div');
+                card.className = `bg-gradient-to-br ${party.color} border ${party.border} ${party.hover} rounded-xl p-3.5 cursor-pointer transition-all duration-200 hover:scale-[1.02] shadow-md flex flex-col justify-between group`;
+                card.onclick = () => voteFor(party.id);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded ${party.badgeBg}">${party.short}</span>
+                        <span class="text-[10px] text-slate-400 group-hover:text-white transition">Cliquer ⚡</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-100 text-xs md:text-sm leading-snug mb-1">${party.name}</h4>
+                        <div class="flex items-baseline justify-between mt-2">
+                            <span class="text-xl font-black font-mono text-white">${count.toLocaleString()}</span>
+                            <span class="text-[11px] text-slate-400 font-semibold">${percentage}%</span>
+                        </div>
+                    </div>
+                `;
+                partiesContainer.appendChild(card);
+            });
+
+            // Génération des barres de progression des résultats
+            resultsContainer.innerHTML = '';
+            const sortedParties = [...partiesData].sort((a, b) => (votes[b.id] || 0) - (votes[a.id] || 0));
+
+            sortedParties.forEach(party => {
+                const count = votes[party.id] || 0;
+                const percentage = totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : 0;
+
+                const row = document.createElement('div');
+                row.className = "space-y-1.5";
+                row.innerHTML = `
+                    <div class="flex justify-between text-xs font-medium text-slate-300">
+                        <span class="font-bold">${party.name}</span>
+                        <span class="font-mono">${count.toLocaleString()} votes (${percentage}%)</span>
+                    </div>
+                    <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-800">
+                        <div class="${party.barColor} h-full rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                resultsContainer.appendChild(row);
+            });
+        }
+
+        // Lancement initial au chargement de la page
+        window.onload = function() {
+            renderApp();
+        };
+    </script>
+</body>
+</html>
